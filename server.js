@@ -14,8 +14,6 @@ const checkAuth = (request, response, next) => {
 
   if (token) {
     jwt.verify(token, app.get('secretKey'), (error, decoded) => {
-
-        // If the token is invalid or expired, respond with an error
       if (error) {
         return response.status(403).send({
           success: false,
