@@ -3,8 +3,8 @@ const app = express();
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const environment = process.env.NODE_ENV || 'development';
-const configuration = require('./knexfile')[environment];
-const database = require('knex')(configuration);
+const config = require('./knexfile')[environment];
+const database = require('knex')(config);
 const domain = process.env.DOMAIN_ENV || 'localhost:3002';
 // const reRouteLink = require('./routes.js')
 const checkAuth = (request, response, next) => {
@@ -53,61 +53,102 @@ app.set('port', process.env.PORT || 3002);
 app.locals.title = 'faceEmotionAPI';
 app.locals.faces = {};
 
-// app.get('/', (request, response) => {
-//   response.sendFile('index.html');
-//   response.sendFile('./styles/index.css');
-//   response.sendFile('./scripts/index.js');
-// });
-//
-// app.get('/api/v1/faces', (request, response) => {
-//   database('faces').select()
-//     .then((faces) => {
-//       if (faces.length) {
-//         response.status(200).json(faces);
-//       } else {
-//         response.status(404).json({
-//           error: 'No faces data found'
-//         });
-//       }
-//     })
-//   .catch((error) => {
-//     response.status(500).json({ error });
-//   });
-// });
-//
-// app.get('/api/v1/emotions', (request, response) => {
-//   database('emotions').select()
-//   .then((emotions) => {
-//     if (emotions.length) {
-//       response.status(200).json(emotions);
-//     } else {
-//       response.status(404).json({
-//         error: 'No emotions data found'
-//       });
-//     }
-//   })
-//   .catch((error) => {
-//     response.status(500).json({ error });
-//   });
-// });
-//
-// app.get('/api/v1/folders/:id', (request, response) => {
-//   database('folders').where('id', request.params.id).select()
-//     .then((folders) => {
-//       if (folders.length) {
-//         response.status(200).json(folders);
-//       } else {
-//         response.status(404).json({
-//           error: `No folders found with id of ${request.params.id}`
-//         });
-//       }
-//     })
-//   .catch((error) => {
-//     response.status(500).json({ error });
-//   });
-// });
-//
-//
+app.get('/api/v1/faces', (request, response) => {
+  database('faces').select()
+    .then((faces) => {
+      if (faces.length) {
+        response.status(200).json(faces);
+      } else {
+        response.status(404).json({
+          error: 'No faces data found'
+        });
+      }
+    })
+  .catch((error) => {
+    response.status(500).json({ error });
+  });
+});
+
+app.get('/api/v1/emotions', (request, response) => {
+  database('emotions').select()
+  .then((emotions) => {
+    if (emotions.length) {
+      response.status(200).json(emotions);
+    } else {
+      response.status(404).json({
+        error: 'No emotions data found'
+      });
+    }
+  })
+  .catch((error) => {
+    response.status(500).json({ error });
+  });
+});
+
+app.get('/api/v1/faces/emotions/:emotion_id', (request, response) => {
+  database('faces').where('emotion_id', request.params.emotion_id).select()
+    .then((faces) => {
+      if (faces.length) {
+        response.status(200).json(faces);
+      } else {
+        response.status(404).json({
+          error: `No faces data found with emotion_id of ${request.params.id}`
+        });
+      }
+    })
+  .catch((error) => {
+    response.status(500).json({ error });
+  });
+});
+
+app.get('/api/v1/faces/ages/:age_id', (request, response) => {
+  database('faces').where('age_id', request.params.age_id).select()
+    .then((faces) => {
+      if (faces.length) {
+        response.status(200).json(faces);
+      } else {
+        response.status(404).json({
+          error: `No faces data found with age_id of ${request.params.id}`
+        });
+      }
+    })
+  .catch((error) => {
+    response.status(500).json({ error });
+  });
+});
+
+app.get('/api/v1/faces/races/:race_id', (request, response) => {
+  database('faces').where('race_id', request.params.race_id).select()
+    .then((faces) => {
+      if (faces.length) {
+        response.status(200).json(faces);
+      } else {
+        response.status(404).json({
+          error: `No faces data found with race_id of ${request.params.id}`
+        });
+      }
+    })
+  .catch((error) => {
+    response.status(500).json({ error });
+  });
+});
+
+app.get('/api/v1/faces/genders/:gender_id', (request, response) => {
+  database('faces').where('gender_id', request.params.gender_id).select()
+    .then((faces) => {
+      if (faces.length) {
+        response.status(200).json(faces);
+      } else {
+        response.status(404).json({
+          error: `No faces data found with gender_id of ${request.params.id}`
+        });
+      }
+    })
+  .catch((error) => {
+    response.status(500).json({ error });
+  });
+});
+
 // app.get('/api/v1/folders/:id/links', (request, response) => {
 //   database('links').where('folder_id', request.params.id).select()
 //     .then((links) => {
