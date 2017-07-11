@@ -84,23 +84,66 @@ app.get('/api/v1/faces/:id', (request, response) => {
     })
   .catch((error) => {
     response.status(500).json({ error });
-  });
-});
+  });});
 
 app.get('/api/v1/faces/emotions/:emotion_id', (request, response) => {
-  database('faces').where('emotion_id', request.params.emotion_id).select()
-    .then((faces) => {
-      if (faces.length) {
-        response.status(200).json(faces);
-      } else {
-        response.status(404).json({
-          error: `No faces data found with emotion_id of ${request.params.id}`
-        });
-      }
-    })
-  .catch((error) => {
-    response.status(500).json({ error });
-  });
+  if ( Object.keys(request.query).includes('gender') ) {
+    database('faces').where('emotion_id', request.params.emotion_id).where('gender_id', request.query.gender).select()
+      .then((faces) => {
+        if (faces.length) {
+          response.status(200).json(faces);
+        } else {
+          response.status(404).json({
+            error: `No faces data found with emotion_id of ${request.params.emotion_id} and gender_id of ${request.query.gender}`
+          });
+        }
+      })
+    .catch((error) => {
+      response.status(500).json({ error });
+    });
+  } else if ( Object.keys(request.query).includes('race') ) {
+    database('faces').where('emotion_id', request.params.emotion_id).where('race_id', request.query.race).select()
+      .then((faces) => {
+        if (faces.length) {
+          response.status(200).json(faces);
+        } else {
+          response.status(404).json({
+            error: `No faces data found with emotion_id of ${request.params.emotion_id} and race_id of ${request.query.race}`
+          });
+        }
+      })
+    .catch((error) => {
+      response.status(500).json({ error });
+    });
+  } else if ( Object.keys(request.query).includes('age') ) {
+    database('faces').where('emotion_id', request.params.emotion_id).where('age_id', request.query.age).select()
+      .then((faces) => {
+        if (faces.length) {
+          response.status(200).json(faces);
+        } else {
+          response.status(404).json({
+            error: `No faces data found with emotion_id of ${request.params.emotion_id} and age_id of ${request.query.age}`
+          });
+        }
+      })
+    .catch((error) => {
+      response.status(500).json({ error });
+    });
+  } else {
+    database('faces').where('emotion_id', request.params.emotion_id).select()
+      .then((faces) => {
+        if (faces.length) {
+          response.status(200).json(faces);
+        } else {
+          response.status(404).json({
+            error: `No faces data found with emotion_id of ${request.params.emotion_id}`
+          });
+        }
+      })
+    .catch((error) => {
+      response.status(500).json({ error });
+    });
+  }
 });
 
 app.get('/api/v1/faces/ages/:age_id', (request, response) => {
@@ -110,7 +153,7 @@ app.get('/api/v1/faces/ages/:age_id', (request, response) => {
         response.status(200).json(faces);
       } else {
         response.status(404).json({
-          error: `No faces data found with age_id of ${request.params.id}`
+          error: `No faces data found with age_id of ${request.params.age_id}`
         });
       }
     })
@@ -126,7 +169,7 @@ app.get('/api/v1/faces/races/:race_id', (request, response) => {
         response.status(200).json(faces);
       } else {
         response.status(404).json({
-          error: `No faces data found with race_id of ${request.params.id}`
+          error: `No faces data found with race_id of ${request.params.race_id}`
         });
       }
     })
@@ -142,7 +185,7 @@ app.get('/api/v1/faces/genders/:gender_id', (request, response) => {
         response.status(200).json(faces);
       } else {
         response.status(404).json({
-          error: `No faces data found with gender_id of ${request.params.id}`
+          error: `No faces data found with gender_id of ${request.params.gender_id}`
         });
       }
     })
@@ -150,7 +193,6 @@ app.get('/api/v1/faces/genders/:gender_id', (request, response) => {
     response.status(500).json({ error });
   });
 });
-
 
 // EMOTIONS ENDPOINTS
 app.get('/api/v1/emotions', (request, response) => {
