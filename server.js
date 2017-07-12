@@ -1,12 +1,33 @@
 const express = require('express');
 const app = express();
-const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const environment = process.env.NODE_ENV || 'development';
-const config = require('./knexfile')[environment];
-const database = require('knex')(config);
+const configuration = require('./knexfile')[environment];
+const database = require('knex')(configuration);
 const domain = process.env.DOMAIN_ENV || 'localhost:3002';
-// const reRouteLink = require('./routes.js')
+const jwt = require('jsonwebtoken');
+const config = require('dotenv').config().parsed;
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(`${__dirname}/public`));
+app.use((req, res, next) => {
+   res.header('Access-Control-Allow-Origin', '*');
+   res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE');
+   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested With, Content-Type, Accept');
+   next();
+});
+
+if (!config.CLIENT_SECRET) {
+  throw 'Make sure you have a CLIENT_SECRET in your .env file';
+}
+app.set('secretKey', config.CLIENT_SECRET);
+app.set('port', process.env.PORT || 3002);
+
+app.locals.title = 'faceEmotionAPI';
+app.locals.faces = {};
+
+// AUTHENTICATION
 const checkAuth = (request, response, next) => {
   const token = request.body.token ||
                 request.param('token') ||
@@ -19,40 +40,40 @@ const checkAuth = (request, response, next) => {
           success: false,
           message: 'Invalid authorization token.'
         });
-      }
-
-      else {
+      } else {
         request.decoded = decoded;
         next();
       }
     });
-  }
-
-  else {
+  } else {
     return response.status(403).send({
       success: false,
-      message: 'You must be authorized to hit this endpoint'
+      message: 'You are not authorized to use this endpoint'
     });
   }
 };
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(`${__dirname}/public`));
-app.use((req, res, next) => {
-   res.header('Access-Control-Allow-Origin', '*');
-   res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE');
-   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested With, Content-Type, Accept');
-   next();
+app.post('/api/v1/requestAuthentication', (request, response) => {
+  const userInfo = request.body;
+
+  if (userInfo.username !== config.USERNAME || userInfo.password !== config.CLIENT_SECRET) {
+    response.status(403).send({
+      success: false,
+      message: 'Your credentials are invalid'
+    });
+  } else {
+    const token = jwt.sign(userInfo, app.get('secretKey'), {
+      expiresIn: 172800
+    });
+
+    response.json({
+      success: true,
+      message: 'Token is valid for 48 hours'
+      username: userInfo.username,
+      token: token
+    });
+  }
 });
-
-app.set('secretKey', config.CLIENT_SECRET);
-
-app.set('port', process.env.PORT || 3002);
-
-app.locals.title = 'faceEmotionAPI';
-app.locals.faces = {};
-
 
 // FACES ENDPOINTS
 app.get('/api/v1/faces', (request, response) => {
@@ -194,6 +215,44 @@ app.get('/api/v1/faces/genders/:gender_id', (request, response) => {
   });
 });
 
+app.post('/api/v1/faces/new', checkAuth, (request, response) => {
+  const face = request.body;
+
+  for (let requiredParameter of ['src', 'alt_text', 'emotion_id', 'race_id', 'age_id', 'gender_id']) {
+    if (!face[requiredParameter]) {
+      return response.status(422).json({
+        error: `Expected format: { arc: <String>, alt_text: <String>, emotion_id: <Integer>, race_id: <Integer>, age_id: <Integer>, gender_id: <Integer> }. You are missing a ${requiredParameter} property.`
+      })
+    }
+  }
+
+  database('faces').insert(face, 'id')
+    .then((faceId) => {
+      response.status(201).json({ id: faceId[0] })
+    })
+  .catch((error) => {
+    response.status(500).json({ error })
+  })
+})
+
+app.put('/api/v1/faces/:id', checkAuth, (request, response) => {
+  const requestKeys = Object.keys(request.body);
+
+  requestKeys.forEach(requestKey => {
+    database('faces').where('id', request.params.id).select()
+    .update(request.body[requestKey], `${requestKey}`)
+    .then(face => {
+      if (face.length) {
+        response.status(201).json(face);
+      } else {
+        response.status(422).json({
+          error: `Could not update the faces data for face with id of ${request.params.id}`
+        });
+      }
+    })
+  });
+})
+
 // EMOTIONS ENDPOINTS
 app.get('/api/v1/emotions', (request, response) => {
   database('emotions').select()
@@ -227,6 +286,49 @@ app.get('/api/v1/emotions/:id', (request, response) => {
   });
 });
 
+app.post('/api/v1/emotions/new', checkAuth, (request, response) => {
+  const emotion = request.body;
+
+  if (!emotion.name) {
+    return response.status(422).send({
+      error: 'No name provided'
+    });
+  }
+
+  database('emotions').insert(emotion, 'id') //Inserting the link, returning the generated id of that paper
+    .then((emotionId) => {
+      response.status(201).json({ id: emotionId[0]})
+    })
+  .catch((error) => {
+    response.status(500).json({ error })
+  })
+});
+
+app.put('/api/v1/emotions/:id', checkAuth, (request, response) => {
+  const updatedEmotionName = request.body.name;
+
+  database('emotions').where('id', request.params.id).select()
+  .update(updatedEmotionName, 'name')
+  .then(emotion => {
+    if (emotion.length) {
+      response.status(201).json(emotion);
+    } else {
+      response.status(422).json({
+        error: `Could not update the emotions name for emotion with id of ${request.params.id}`
+      });
+    }
+  })
+})
+
+app.delete('/api/v1/emotions/:id', checkAuth, (request, response) => {
+  database('emotions').where('id', request.params.id).del()
+  .then(() => {
+    response.status(204)
+  })
+  .catch(error => {
+    response.status(500).json({ error })
+  })
+})
 
 // RACES ENDPOINTS
 app.get('/api/v1/races', (request, response) => {
@@ -261,7 +363,23 @@ app.get('/api/v1/races/:id', (request, response) => {
   });
 });
 
+app.post('/api/v1/races/new', checkAuth, (request, response) => {
+  const race = request.body;
 
+  if (!race.name) {
+    return response.status(422).send({
+      error: 'No name provided'
+    });
+  }
+
+  database('races').insert(race, 'id') //Inserting the link, returning the generated id of that paper
+    .then((raceId) => {
+      response.status(201).json({ id: raceId[0]})
+    })
+  .catch((error) => {
+    response.status(500).json({ error })
+  })
+});
 
 // AGES ENDPOINTS
 app.get('/api/v1/ages', (request, response) => {
@@ -280,7 +398,6 @@ app.get('/api/v1/ages', (request, response) => {
   });
 });
 
-
 app.get('/api/v1/ages/:id', (request, response) => {
   database('ages').where('id', request.params.id).select()
     .then((ages) => {
@@ -296,8 +413,6 @@ app.get('/api/v1/ages/:id', (request, response) => {
     response.status(500).json({ error });
   });
 });
-
-
 
 // GENDERS ENDPOINTS
 app.get('/api/v1/genders', (request, response) => {
@@ -316,7 +431,6 @@ app.get('/api/v1/genders', (request, response) => {
   });
 });
 
-
 app.get('/api/v1/genders/:id', (request, response) => {
   database('genders').where('id', request.params.id).select()
     .then((genders) => {
@@ -332,8 +446,6 @@ app.get('/api/v1/genders/:id', (request, response) => {
     response.status(500).json({ error });
   });
 });
-
-
 
 // LISTEN
 app.listen(app.get('port'), () => {
