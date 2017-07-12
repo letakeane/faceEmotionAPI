@@ -34,7 +34,7 @@
   "bugs": {
     "url": "https://github.com/letakeane/faceEmotionAPI/issues"
   },
-  "homepage": "https://github.com/letakeane/faceEmotionAPI/issues",
+  "homepage": "https://github.com/letakeane/faceEmotionAPI/",
   "pre-commit": [
     "lint"
   ]
