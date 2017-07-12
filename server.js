@@ -7,6 +7,8 @@ const database = require('knex')(configuration);
 const domain = process.env.DOMAIN_ENV || 'localhost:3002';
 const jwt = require('jsonwebtoken');
 const config = require('dotenv').config().parsed;
+console.log('config.USERNAME: ', config.USERNAME);
+console.log('config.PASSWORD: ', config.PASSWORD);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -55,8 +57,9 @@ const checkAuth = (request, response, next) => {
 
 app.post('/api/v1/requestAuthentication', (request, response) => {
   const userInfo = request.body;
+console.log(userInfo);
 
-  if (userInfo.username !== config.USERNAME || userInfo.password !== config.CLIENT_SECRET) {
+  if (userInfo.username !== config.USERNAME || userInfo.password !== config.PASSWORD) {
     response.status(403).send({
       success: false,
       message: 'Your credentials are invalid'
@@ -68,7 +71,7 @@ app.post('/api/v1/requestAuthentication', (request, response) => {
 
     response.json({
       success: true,
-      message: 'Token is valid for 48 hours'
+      message: 'Token is valid for 48 hours',
       username: userInfo.username,
       token: token
     });
@@ -236,21 +239,18 @@ app.post('/api/v1/faces/new', checkAuth, (request, response) => {
 })
 
 app.put('/api/v1/faces/:id', checkAuth, (request, response) => {
-  const requestKeys = Object.keys(request.body);
+  const updatedAltText = request.body.alt_text;
 
-  requestKeys.forEach(requestKey => {
-    database('faces').where('id', request.params.id).select()
-    .update(request.body[requestKey], `${requestKey}`)
-    .then(face => {
-      if (face.length) {
-        response.status(201).json(face);
-      } else {
-        response.status(422).json({
-          error: `Could not update the faces data for face with id of ${request.params.id}`
-        });
-      }
-    })
-  });
+  database('faces').where('id', request.params.id).select()
+  .update('alt_text', updatedAltText)
+  .then((rowsUpdated) => {
+    response.status(201).json({ rowsUpdated: rowsUpdated });
+  })
+  .catch(error => {
+    response.status(422).json({
+      error: `Could not update the faces data for face with id of ${request.params.id}`
+    });
+  })
 })
 
 // EMOTIONS ENDPOINTS
