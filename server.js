@@ -7,8 +7,6 @@ const database = require('knex')(configuration);
 const domain = process.env.DOMAIN_ENV || 'localhost:3002';
 const jwt = require('jsonwebtoken');
 const config = require('dotenv').config().parsed;
-console.log('config.USERNAME: ', config.USERNAME);
-console.log('config.PASSWORD: ', config.PASSWORD);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -27,7 +25,6 @@ app.set('secretKey', config.CLIENT_SECRET);
 app.set('port', process.env.PORT || 3002);
 
 app.locals.title = 'faceEmotionAPI';
-app.locals.faces = {};
 
 // AUTHENTICATION
 const checkAuth = (request, response, next) => {
@@ -66,12 +63,12 @@ console.log(userInfo);
     });
   } else {
     const token = jwt.sign(userInfo, app.get('secretKey'), {
-      expiresIn: 172800
+      expiresIn: 604800
     });
 
     response.json({
       success: true,
-      message: 'Token is valid for 48 hours',
+      message: 'Token is valid for one week',
       username: userInfo.username,
       token: token
     });
@@ -238,7 +235,7 @@ app.post('/api/v1/faces/new', checkAuth, (request, response) => {
   })
 })
 
-app.put('/api/v1/faces/:id', checkAuth, (request, response) => {
+app.patch('/api/v1/faces/:id', checkAuth, (request, response) => {
   const updatedAltText = request.body.alt_text;
 
   database('faces').where('id', request.params.id).select()
@@ -250,6 +247,16 @@ app.put('/api/v1/faces/:id', checkAuth, (request, response) => {
     response.status(422).json({
       error: `Could not update the faces data for face with id of ${request.params.id}`
     });
+  })
+})
+
+app.delete('/api/v1/faces/:id', checkAuth, (request, response) => {
+  database('faces').where('id', request.params.id).del()
+  .then(() => {
+    response.status(204)
+  })
+  .catch(error => {
+    response.status(500).json({ error })
   })
 })
 
@@ -304,7 +311,7 @@ app.post('/api/v1/emotions/new', checkAuth, (request, response) => {
   })
 });
 
-app.put('/api/v1/emotions/:id', checkAuth, (request, response) => {
+app.patch('/api/v1/emotions/:id', checkAuth, (request, response) => {
   const updatedEmotionName = request.body.name;
 
   database('emotions').where('id', request.params.id).select()

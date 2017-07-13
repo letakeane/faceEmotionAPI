@@ -1,4 +1,4 @@
-let facesData = [
+export const facesData = [
   {
     id: 1,
     src: 'https://upload.wikimedia.org/wikipedia/commons/b/b2/Laughing_Girl_%28Imagicity_1138%29.jpg',
@@ -296,29 +296,42 @@ let facesData = [
     gender_id: 3
   }
 
+];
+
+export const gendersData = [
+  {
+    id: 1,
+    name: 'more feminine'
+  },
+  {
+    id: 2,
+    name: 'androgynous/nonbinary/agender'
+  },
+  {
+    id: 3,
+    name: 'more masculine'
+  }
+];
+
+export const agesData = [
+  {
+    id: 1,
+    name: 'infant'
+  },
+  {
+    id: 2,
+    name: 'child'
+  },
+  {
+    id: 3,
+    name: 'teen'
+  },
+  {
+    id: 4,
+    name: 'adult'
+  },
+  {
+    id: 5,
+    name: 'elder'
+  }
 ]
-
-const createFace = (knex, face) => {
-  return knex('faces').insert({
-    src: face.src,
-    alt_text: face.alt_text,
-    emotion_id: face.emotion_id,
-    race_id: face.race_id,
-    age_id: face.age_id,
-    gender_id: face.gender_id
-  }, 'id')
-};
-
-exports.seed = (knex, Promise) => {
-  return knex('faces').del()
-    .then(() => {
-      let facesPromises = [];
-
-      facesData.forEach(face => {
-        facesPromises.push(createFace(knex, face));
-      });
-
-      return Promise.all(facesPromises);
-    })
-    .catch(error => console.log(`Error seeding data: ${error}`));
-};
