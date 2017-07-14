@@ -6,7 +6,7 @@ const configuration = require('../knexfile')[environment];
 const database = require('knex')(configuration);
 const domain = process.env.DOMAIN_ENV || 'localhost:3002';
 const jwt = require('jsonwebtoken');
-const config = require('dotenv').config().parsed;
+// const config = require('dotenv').config().parsed;
 
 const chai = require('chai');
 const should = chai.should();
@@ -19,7 +19,7 @@ chai.use(chaiHttp);
 
 const headers = {
   'Content-Type': 'application/json',
-  'Authorization': config.TOKEN
+  'Authorization': process.env.TOKEN
 }
 
 
@@ -255,7 +255,7 @@ describe('API endpoints tests', () => {
   it('should create a new face, HAPPY PATH', (done) => {
     chai.request(server)
     .post('/api/v1/faces/new')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .send({
       'id': 34,
       'src': 'src',
@@ -277,7 +277,7 @@ describe('API endpoints tests', () => {
   it('should create a new face, SAD PATH', (done) => {
     chai.request(server)
     .post('/api/v1/faces/new')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .end((err, response) => {
       response.should.have.status(422);
       response.body.should.be.a('object');
@@ -290,7 +290,7 @@ describe('API endpoints tests', () => {
   it('should delete a face, HAPPY PATH', (done) => {
     chai.request(server)
     .delete('/api/v1/faces/34')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .end((err, response) => {
       response.should.have.status(204);
       done();
@@ -300,7 +300,7 @@ describe('API endpoints tests', () => {
   it('should patch a face, HAPPY PATH', (done) => {
     chai.request(server)
     .patch('/api/v1/faces/34')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .send({
       'alt_text': 'updated alt text'
     })
@@ -316,7 +316,7 @@ describe('API endpoints tests', () => {
   it('should patch a face, SAD PATH', (done) => {
     chai.request(server)
     .patch('/api/v1/faces/34')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .send({
       'gender_id': 3
     })
@@ -332,7 +332,7 @@ describe('API endpoints tests', () => {
   it('should delete a face, SAD PATH', (done) => {
     chai.request(server)
     .delete('/api/v1/faces/34')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .end((err, response) => {
       response.should.have.status(422);
       response.body.should.be.a('object');
@@ -389,7 +389,7 @@ describe('API endpoints tests', () => {
   it('should create a new emotion, HAPPY PATH', (done) => {
     chai.request(server)
     .post('/api/v1/emotions/new')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .send({
       id: 11,
       name: 'new emotion'
@@ -406,7 +406,7 @@ describe('API endpoints tests', () => {
   it('should create a new emotion, SAD PATH', (done) => {
     chai.request(server)
     .post('/api/v1/emotions/new')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .send({
       incorrectKey: 'nonsense!'
     })
@@ -422,7 +422,7 @@ describe('API endpoints tests', () => {
   it('should patch an emotion, HAPPY PATH', (done) => {
     chai.request(server)
     .patch('/api/v1/emotions/11')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .send({
       name: 'boredom'
     })
@@ -438,7 +438,7 @@ describe('API endpoints tests', () => {
   it('should patch an emotion, SAD PATH', (done) => {
     chai.request(server)
     .patch('/api/v1/emotions/10')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .send({
       'notARealKey': 'blah blah blah'
     })
@@ -454,7 +454,7 @@ describe('API endpoints tests', () => {
   it('should delete an emotion, HAPPY PATH', (done) => {
     chai.request(server)
     .delete('/api/v1/emotions/11')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .end((err, response) => {
       response.should.have.status(204);
       done();
@@ -464,7 +464,7 @@ describe('API endpoints tests', () => {
   it('should delete an emotion, SAD PATH', (done) => {
     chai.request(server)
     .delete('/api/v1/emotions/11')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .end((err, response) => {
       response.should.have.status(422);
       response.body.should.be.a('object');
@@ -520,7 +520,7 @@ describe('API endpoints tests', () => {
   it('should create a new race, HAPPY PATH', (done) => {
     chai.request(server)
     .post('/api/v1/races/new')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .send({
       id: 11,
       name: 'not applicable'
@@ -537,7 +537,7 @@ describe('API endpoints tests', () => {
   it('should create a new race, SAD PATH', (done) => {
     chai.request(server)
     .post('/api/v1/races/new')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .send({
       incorrectKey: 'nonsense!'
     })
@@ -553,7 +553,7 @@ describe('API endpoints tests', () => {
   it('should delete an race, HAPPY PATH', (done) => {
     chai.request(server)
     .delete('/api/v1/races/11')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .end((err, response) => {
       response.should.have.status(204);
       done();
@@ -563,7 +563,7 @@ describe('API endpoints tests', () => {
   it('should delete an race, SAD PATH', (done) => {
     chai.request(server)
     .delete('/api/v1/races/11')
-    .set('Authorization', config.TOKEN)
+    .set('Authorization', process.env.TOKEN)
     .end((err, response) => {
       response.should.have.status(422);
       response.body.should.be.a('object');
