@@ -307,7 +307,7 @@ app.post('/api/v1/emotions/new', checkAuth, (request, response) => {
     });
   }
 
-  database('emotions').insert(emotion, 'id') //Inserting the link, returning the generated id of that paper
+  database('emotions').insert(emotion, 'id')
     .then((emotionId) => {
       response.status(201).json({ id: emotionId[0]})
     })
@@ -320,15 +320,14 @@ app.patch('/api/v1/emotions/:id', checkAuth, (request, response) => {
   const updatedEmotionName = request.body.name;
 
   database('emotions').where('id', request.params.id).select()
-  .update(updatedEmotionName, 'name')
-  .then(emotion => {
-    if (emotion.length) {
-      response.status(201).json(emotion);
-    } else {
-      response.status(422).json({
-        error: `Could not update the emotions name for emotion with id of ${request.params.id}`
-      });
-    }
+  .update('name', updatedEmotionName)
+  .then((rowsUpdated) => {
+    response.status(201).json({ rowsUpdated: rowsUpdated });
+  })
+  .catch(error => {
+    response.status(422).json({
+      error: `Could not update the emotions data for emotion with id of ${request.params.id}`
+    });
   })
 })
 
@@ -396,6 +395,20 @@ app.post('/api/v1/races/new', checkAuth, (request, response) => {
     response.status(500).json({ error })
   })
 });
+
+app.delete('/api/v1/races/:id', checkAuth, (request, response) => {
+  database('races').where('id', request.params.id).del()
+  .then((data) => {
+    if(data > 0) {
+      response.status(204).json({ 'message': `Race with id of ${request.params.id} has been deleted` });
+    } else {
+      response.status(422).json({ 'error': `Could not delete race with id of ${request.params.id} because it did not exist` });
+    }
+  })
+  .catch(error => {
+    response.status(500).json({ error })
+  })
+})
 
 // AGES ENDPOINTS
 app.get('/api/v1/ages', (request, response) => {

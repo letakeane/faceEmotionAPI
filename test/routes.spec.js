@@ -297,6 +297,38 @@ describe('API endpoints tests', () => {
     });
   });
 
+  it('should patch a face, HAPPY PATH', (done) => {
+    chai.request(server)
+    .patch('/api/v1/faces/34')
+    .set('Authorization', config.TOKEN)
+    .send({
+      'alt_text': 'updated alt text'
+    })
+    .end((err, response) => {
+      response.should.have.status(201);
+      response.body.should.be.a('object');
+      response.body.should.have.property('rowsUpdated');
+      response.body.rowsUpdated.should.equal(0);
+      done();
+    });
+  });
+
+  it('should patch a face, SAD PATH', (done) => {
+    chai.request(server)
+    .patch('/api/v1/faces/34')
+    .set('Authorization', config.TOKEN)
+    .send({
+      'gender_id': 3
+    })
+    .end((err, response) => {
+      response.should.have.status(422);
+      response.body.should.be.a('object');
+      response.body.should.have.property('error');
+      response.body.error.should.equal('Could not update the faces data for face with id of 34');
+      done();
+    });
+  });
+
   it('should delete a face, SAD PATH', (done) => {
     chai.request(server)
     .delete('/api/v1/faces/34')
@@ -306,44 +338,6 @@ describe('API endpoints tests', () => {
       response.body.should.be.a('object');
       response.body.should.have.property('error');
       response.body.error.should.equal('Could not delete face with id of 34 because it did not exist');
-      done();
-    });
-  });
-
-  it.skip('should patch a face, HAPPY PATH', (done) => {
-    chai.request(server)
-    .patch('/api/v1/faces/34')
-    .send({
-      method: 'PATCH',
-      headers: headers,
-      body: {
-        alt_text: 'updated alt text'
-      }
-    })
-    .end((err, response) => {
-      response.should.have.status(201);
-      response.body.should.be.a('object');
-      response.body.should.have.property('alt_text');
-      response.body.id.should.equal('updated alt text');
-      done();
-    });
-  });
-
-  it.skip('should patch a face, SAD PATH', (done) => {
-    chai.request(server)
-    .patch('/api/v1/faces/34')
-    .send({
-      method: 'PATCH',
-      headers: headers,
-      body: {
-        'gender_id': 3
-      }
-    })
-    .end((err, response) => {
-      response.should.have.status(201);
-      response.body.should.be.a('object');
-      response.body.should.have.property('error');
-      response.body.error.should.equal('Could not update the faces data for face with id of 34');
       done();
     });
   });
@@ -392,40 +386,32 @@ describe('API endpoints tests', () => {
     });
   })
 
-  it.skip('should create a new emotion, HAPPY PATH', (done) => {
+  it('should create a new emotion, HAPPY PATH', (done) => {
     chai.request(server)
     .post('/api/v1/emotions/new')
+    .set('Authorization', config.TOKEN)
     .send({
-      method: 'POST',
-      headers: headers,
-      body: {
-        id: 11,
-        name: 'EMOTION'
-      }
+      id: 11,
+      name: 'new emotion'
     })
     .end((err, response) => {
       response.should.have.status(201);
       response.body.should.be.a('object');
       response.body.should.have.property('id');
-      response.body.id.should.equal('11');
-      response.body.should.have.property('name');
-      response.body.name.should.equal('EMOTION');
+      response.body.id.should.equal(11);
       done();
     });
   });
 
-  it.skip('should create a new emotion, SAD PATH', (done) => {
+  it('should create a new emotion, SAD PATH', (done) => {
     chai.request(server)
     .post('/api/v1/emotions/new')
+    .set('Authorization', config.TOKEN)
     .send({
-      method: 'POST',
-      headers: headers,
-      body: {
-        incorrectKey: 'nonsense!'
-      }
+      incorrectKey: 'nonsense!'
     })
     .end((err, response) => {
-      response.should.have.status(201);
+      response.should.have.status(422);
       response.body.should.be.a('object');
       response.body.should.have.property('error');
       response.body.error.should.equal('No name provided');
@@ -433,68 +419,57 @@ describe('API endpoints tests', () => {
     });
   });
 
-  it.skip('should patch an emotion, HAPPY PATH', (done) => {
+  it('should patch an emotion, HAPPY PATH', (done) => {
     chai.request(server)
-    .patch('/api/v1/emotions/10')
+    .patch('/api/v1/emotions/11')
+    .set('Authorization', config.TOKEN)
     .send({
-      method: 'PATCH',
-      headers: headers,
-      body: {
-        name: 'DISAPPOINTMENT'
-      }
+      name: 'boredom'
     })
     .end((err, response) => {
       response.should.have.status(201);
       response.body.should.be.a('object');
-      response.body.should.have.property('name');
-      response.body.name.should.equal('DISAPPOINTMENT');
+      response.body.should.have.property('rowsUpdated');
+      response.body.rowsUpdated.should.equal(1);
       done();
     });
   });
 
-  it.skip('should patch an emotion, SAD PATH', (done) => {
+  it('should patch an emotion, SAD PATH', (done) => {
     chai.request(server)
     .patch('/api/v1/emotions/10')
+    .set('Authorization', config.TOKEN)
     .send({
-      method: 'PATCH',
-      headers: headers,
-      body: {
-        'notARealKey': 'blah blah blah'
-      }
+      'notARealKey': 'blah blah blah'
     })
     .end((err, response) => {
       response.should.have.status(422);
       response.body.should.be.a('object');
       response.body.should.have.property('error');
-      response.body.error.should.equal('Could not update the emotions name for emotion with id of 10');
+      response.body.error.should.equal('Could not update the emotions data for emotion with id of 10');
       done();
     });
   });
 
-  it.skip('should delete an emotion, HAPPY PATH', (done) => {
+  it('should delete an emotion, HAPPY PATH', (done) => {
     chai.request(server)
-    .delete('/api/v1/emotions/10')
-    .send({
-      method: 'DELETE',
-      headers: headers
-    })
+    .delete('/api/v1/emotions/11')
+    .set('Authorization', config.TOKEN)
     .end((err, response) => {
       response.should.have.status(204);
       done();
     });
   });
 
-  it.skip('should delete an emotion, SAD PATH', (done) => {
+  it('should delete an emotion, SAD PATH', (done) => {
     chai.request(server)
-    .patch('/api/v1/emotions/20')
-    .send({
-      incorrectAuthentication: 'oops'
-    })
+    .delete('/api/v1/emotions/11')
+    .set('Authorization', config.TOKEN)
     .end((err, response) => {
-      response.should.have.status(201);
+      response.should.have.status(422);
       response.body.should.be.a('object');
-      response.body.should.have.property('message');
-      response.body.message.should.equal('Invalid authorization token.');
+      response.body.should.have.property('error');
+      response.body.error.should.equal('Could not delete emotion with id of 11 because it did not exist');
       done();
     });
   });
@@ -542,41 +517,58 @@ describe('API endpoints tests', () => {
     });
   })
 
-  it.skip('should create a new race, HAPPY PATH', (done) => {
+  it('should create a new race, HAPPY PATH', (done) => {
     chai.request(server)
     .post('/api/v1/races/new')
+    .set('Authorization', config.TOKEN)
     .send({
-      method: 'POST',
-      headers: headers,
-      body: {
-        id: 11,
-        name: 'not applicable'
-      }
+      id: 11,
+      name: 'not applicable'
     })
     .end((err, response) => {
       response.should.have.status(201);
       response.body.should.be.a('object');
       response.body.should.have.property('id');
-      response.body.id.should.equal('11');
+      response.body.id.should.equal(11);
       done();
     });
   });
 
-  it.skip('should create a new emotion, SAD PATH', (done) => {
+  it('should create a new race, SAD PATH', (done) => {
     chai.request(server)
-    .post('/api/v1/emotions/new')
+    .post('/api/v1/races/new')
+    .set('Authorization', config.TOKEN)
     .send({
-      method: 'POST',
-      headers: headers,
-      body: {
-        incorrectKey: 'nonsense!'
-      }
+      incorrectKey: 'nonsense!'
     })
     .end((err, response) => {
-      response.should.have.status(201);
+      response.should.have.status(422);
       response.body.should.be.a('object');
       response.body.should.have.property('error');
       response.body.error.should.equal('No name provided');
+      done();
+    });
+  });
+
+  it('should delete an race, HAPPY PATH', (done) => {
+    chai.request(server)
+    .delete('/api/v1/races/11')
+    .set('Authorization', config.TOKEN)
+    .end((err, response) => {
+      response.should.have.status(204);
+      done();
+    });
+  });
+
+  it('should delete an race, SAD PATH', (done) => {
+    chai.request(server)
+    .delete('/api/v1/races/11')
+    .set('Authorization', config.TOKEN)
+    .end((err, response) => {
+      response.should.have.status(422);
+      response.body.should.be.a('object');
+      response.body.should.have.property('error');
+      response.body.error.should.equal('Could not delete race with id of 11 because it did not exist');
       done();
     });
   });
