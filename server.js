@@ -6,7 +6,7 @@ const configuration = require('./knexfile')[environment];
 const database = require('knex')(configuration);
 // const domain = process.env.DOMAIN_ENV || 'localhost:3002';
 const jwt = require('jsonwebtoken');
-// const config = require('dotenv').config().parsed;
+const config = require('dotenv').config();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
