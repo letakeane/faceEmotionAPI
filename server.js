@@ -21,6 +21,7 @@ app.use((req, res, next) => {
 if (!config.CLIENT_SECRET) {
   throw 'Make sure you have a CLIENT_SECRET in your .env file';
 }
+
 app.set('secretKey', config.CLIENT_SECRET);
 app.set('port', process.env.PORT || 3002);
 
@@ -29,7 +30,7 @@ app.locals.title = 'faceEmotionAPI';
 // AUTHENTICATION
 const checkAuth = (request, response, next) => {
   const token = request.body.token ||
-                request.param('token') ||
+                request.params.token ||
                 request.headers['authorization'];
 
   if (token) {
@@ -45,6 +46,7 @@ const checkAuth = (request, response, next) => {
       }
     });
   } else {
+    console.log('You are not authorized to use endpoint');
     return response.status(403).send({
       success: false,
       message: 'You are not authorized to use this endpoint'
@@ -54,7 +56,6 @@ const checkAuth = (request, response, next) => {
 
 app.post('/api/v1/requestAuthentication', (request, response) => {
   const userInfo = request.body;
-console.log(userInfo);
 
   if (userInfo.username !== config.USERNAME || userInfo.password !== config.PASSWORD) {
     response.status(403).send({
@@ -252,8 +253,12 @@ app.patch('/api/v1/faces/:id', checkAuth, (request, response) => {
 
 app.delete('/api/v1/faces/:id', checkAuth, (request, response) => {
   database('faces').where('id', request.params.id).del()
-  .then(() => {
-    response.status(204)
+  .then((data) => {
+    if(data > 0) {
+      response.status(204).json({ 'message': `Face with id of ${request.params.id} has been deleted` });
+    } else {
+      response.status(422).json({ 'error': `Could not delete face with id of ${request.params.id} because it did not exist` });
+    }
   })
   .catch(error => {
     response.status(500).json({ error })
@@ -329,8 +334,12 @@ app.patch('/api/v1/emotions/:id', checkAuth, (request, response) => {
 
 app.delete('/api/v1/emotions/:id', checkAuth, (request, response) => {
   database('emotions').where('id', request.params.id).del()
-  .then(() => {
-    response.status(204)
+  .then((data) => {
+    if(data > 0) {
+      response.status(204).json({ 'message': `Emotion with id of ${request.params.id} has been deleted` });
+    } else {
+      response.status(422).json({ 'error': `Could not delete emotion with id of ${request.params.id} because it did not exist` });
+    }
   })
   .catch(error => {
     response.status(500).json({ error })

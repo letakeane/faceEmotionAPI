@@ -15,20 +15,24 @@ let gendersData = [
 
 const createEmotion = (knex, gender) => {
   return knex('genders').insert({
+    id: gender.id,
     name: gender.name
   }, 'id')
 };
 
 exports.seed = (knex, Promise) => {
-  return knex('genders').del()
+  return knex('faces').del()
     .then(() => {
-      let gendersPromises = [];
+      return knex('genders').del()
+        .then(() => {
+          let gendersPromises = [];
 
-      gendersData.forEach(gender => { //can't loop through anything in the insert step of knex
-        gendersPromises.push(createEmotion(knex, gender));
-      });
+          gendersData.forEach(gender => { //can't loop through anything in the insert step of knex
+            gendersPromises.push(createEmotion(knex, gender));
+          });
 
-      return Promise.all(gendersPromises);
-    })
+          return Promise.all(gendersPromises);
+        })
+      })
     .catch(error => console.log(`Error seeding data: ${error}`));
 };

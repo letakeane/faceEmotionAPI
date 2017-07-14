@@ -49,7 +49,7 @@ let facesData = [
     src: 'https://upload.wikimedia.org/wikipedia/commons/9/99/Afghan_Girl_%284272097943%29.jpg',
     alt_text: 'sad Afghan feminine child',
     emotion_id: 2,
-    race_id: 1,
+    race_id: 2,
     age_id: 2,
     gender_id: 1
   },
@@ -300,6 +300,7 @@ let facesData = [
 
 const createFace = (knex, face) => {
   return knex('faces').insert({
+    id: face.id,
     src: face.src,
     alt_text: face.alt_text,
     emotion_id: face.emotion_id,

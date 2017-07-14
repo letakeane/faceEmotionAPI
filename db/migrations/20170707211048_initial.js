@@ -1,7 +1,7 @@
 exports.up = function(knex, Promise) {
   return Promise.all([
     knex.schema.createTable('faces', (table) => {
-      table.increments('id').primary()
+      table.integer('id').primary()
       table.string('src')
       table.string('alt_text')
       table.integer('emotion_id').unsigned()

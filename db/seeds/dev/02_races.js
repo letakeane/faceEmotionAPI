@@ -27,20 +27,24 @@ let racesData = [
 
 const createEmotion = (knex, race) => {
   return knex('races').insert({
+    id: race.id,
     name: race.name
   }, 'id')
 };
 
 exports.seed = (knex, Promise) => {
-  return knex('races').del()
+  return knex('faces').del()
     .then(() => {
-      let racesPromises = [];
+      return knex('races').del()
+        .then(() => {
+          let racesPromises = [];
 
-      racesData.forEach(race => { //can't loop through anything in the insert step of knex
-        racesPromises.push(createEmotion(knex, race));
-      });
+          racesData.forEach(race => {
+            racesPromises.push(createEmotion(knex, race));
+          });
 
-      return Promise.all(racesPromises);
-    })
+          return Promise.all(racesPromises);
+        })
+      })
     .catch(error => console.log(`Error seeding data: ${error}`));
 };

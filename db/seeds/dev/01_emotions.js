@@ -45,19 +45,22 @@ const createEmotion = (knex, emotion) => {
   return knex('emotions').insert({
     id: emotion.id,
     name: emotion.name
-  }, 'id')
+  })
 };
 
 exports.seed = (knex, Promise) => {
-  return knex('emotions').del()
+  return knex('faces').del()
     .then(() => {
-      let emotionsPromises = [];
+      return knex('emotions').del()
+        .then(() => {
+          let emotionsPromises = [];
 
-      emotionsData.forEach(emotion => { //can't loop through anything in the insert step of knex
-        emotionsPromises.push(createEmotion(knex, emotion));
-      });
+          emotionsData.forEach(emotion => {
+            emotionsPromises.push(createEmotion(knex, emotion));
+          });
 
-      return Promise.all(emotionsPromises);
+          return Promise.all(emotionsPromises);
+        })
     })
     .catch(error => console.log(`Error seeding data: ${error}`));
 };
