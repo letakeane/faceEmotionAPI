@@ -448,7 +448,7 @@ describe('API endpoints tests', () => {
     });
   });
 
-  it('should delete an emotion, HAPPY PATH', (done) => {
+  it.skip('should delete an emotion, HAPPY PATH', (done) => {
     chai.request(server)
     .delete('/api/v1/emotions/10')
     .set('Authorization', process.env.TOKEN)
@@ -547,7 +547,7 @@ describe('API endpoints tests', () => {
     });
   });
 
-  it('should delete an race, HAPPY PATH', (done) => {
+  it('should delete a race, HAPPY PATH', (done) => {
     chai.request(server)
     .delete('/api/v1/races/6')
     .set('Authorization', process.env.TOKEN)
@@ -557,7 +557,7 @@ describe('API endpoints tests', () => {
     });
   });
 
-  it('should delete an race, SAD PATH', (done) => {
+  it('should delete a race, SAD PATH', (done) => {
     chai.request(server)
     .delete('/api/v1/races/11')
     .set('Authorization', process.env.TOKEN)
