@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const environment = process.env.NODE_ENV || 'development';
 const configuration = require('./knexfile')[environment];
 const database = require('knex')(configuration);
-const domain = process.env.DOMAIN_ENV || 'localhost:3002';
+// const domain = process.env.DOMAIN_ENV || 'localhost:3002';
 const jwt = require('jsonwebtoken');
 const config = require('dotenv').config().parsed;
 
@@ -46,7 +46,6 @@ const checkAuth = (request, response, next) => {
       }
     });
   } else {
-    console.log('You are not authorized to use endpoint');
     return response.status(403).send({
       success: false,
       message: 'You are not authorized to use this endpoint'
@@ -223,18 +222,18 @@ app.post('/api/v1/faces/new', checkAuth, (request, response) => {
     if (!face[requiredParameter]) {
       return response.status(422).json({
         error: `Expected format: { arc: <String>, alt_text: <String>, emotion_id: <Integer>, race_id: <Integer>, age_id: <Integer>, gender_id: <Integer> }. You are missing a ${requiredParameter} property.`
-      })
+      });
     }
   }
 
   database('faces').insert(face, 'id')
     .then((faceId) => {
-      response.status(201).json({ id: faceId[0] })
+      response.status(201).json({ id: faceId[0] });
     })
   .catch((error) => {
-    response.status(500).json({ error })
-  })
-})
+    response.status(500).json({ error });
+  });
+});
 
 app.patch('/api/v1/faces/:id', checkAuth, (request, response) => {
   const updatedAltText = request.body.alt_text;
@@ -244,12 +243,12 @@ app.patch('/api/v1/faces/:id', checkAuth, (request, response) => {
   .then((rowsUpdated) => {
     response.status(201).json({ rowsUpdated: rowsUpdated });
   })
-  .catch(error => {
+  .catch(() => {
     response.status(422).json({
       error: `Could not update the faces data for face with id of ${request.params.id}`
     });
-  })
-})
+  });
+});
 
 app.delete('/api/v1/faces/:id', checkAuth, (request, response) => {
   database('faces').where('id', request.params.id).del()
@@ -261,9 +260,9 @@ app.delete('/api/v1/faces/:id', checkAuth, (request, response) => {
     }
   })
   .catch(error => {
-    response.status(500).json({ error })
-  })
-})
+    response.status(500).json({ error });
+  });
+});
 
 // EMOTIONS ENDPOINTS
 app.get('/api/v1/emotions', (request, response) => {
@@ -309,11 +308,11 @@ app.post('/api/v1/emotions/new', checkAuth, (request, response) => {
 
   database('emotions').insert(emotion, 'id')
     .then((emotionId) => {
-      response.status(201).json({ id: emotionId[0]})
+      response.status(201).json({ id: emotionId[0]});
     })
   .catch((error) => {
-    response.status(500).json({ error })
-  })
+    response.status(500).json({ error });
+  });
 });
 
 app.patch('/api/v1/emotions/:id', checkAuth, (request, response) => {
@@ -324,12 +323,12 @@ app.patch('/api/v1/emotions/:id', checkAuth, (request, response) => {
   .then((rowsUpdated) => {
     response.status(201).json({ rowsUpdated: rowsUpdated });
   })
-  .catch(error => {
+  .catch(() => {
     response.status(422).json({
       error: `Could not update the emotions data for emotion with id of ${request.params.id}`
     });
-  })
-})
+  });
+});
 
 app.delete('/api/v1/emotions/:id', checkAuth, (request, response) => {
   database('emotions').where('id', request.params.id).del()
@@ -341,9 +340,9 @@ app.delete('/api/v1/emotions/:id', checkAuth, (request, response) => {
     }
   })
   .catch(error => {
-    response.status(500).json({ error })
-  })
-})
+    response.status(500).json({ error });
+  });
+});
 
 // RACES ENDPOINTS
 app.get('/api/v1/races', (request, response) => {
@@ -389,11 +388,11 @@ app.post('/api/v1/races/new', checkAuth, (request, response) => {
 
   database('races').insert(race, 'id') //Inserting the link, returning the generated id of that paper
     .then((raceId) => {
-      response.status(201).json({ id: raceId[0]})
+      response.status(201).json({ id: raceId[0]});
     })
   .catch((error) => {
-    response.status(500).json({ error })
-  })
+    response.status(500).json({ error });
+  });
 });
 
 app.delete('/api/v1/races/:id', checkAuth, (request, response) => {
@@ -406,9 +405,9 @@ app.delete('/api/v1/races/:id', checkAuth, (request, response) => {
     }
   })
   .catch(error => {
-    response.status(500).json({ error })
-  })
-})
+    response.status(500).json({ error });
+  });
+});
 
 // AGES ENDPOINTS
 app.get('/api/v1/ages', (request, response) => {
@@ -478,7 +477,6 @@ app.get('/api/v1/genders/:id', (request, response) => {
 
 // LISTEN
 app.listen(app.get('port'), () => {
-  console.log(`${app.locals.title} is running on ${app.get('port')}`);
 });
 
 module.exports = app;
