@@ -6,7 +6,7 @@ const configuration = require('./knexfile')[environment];
 const database = require('knex')(configuration);
 // const domain = process.env.DOMAIN_ENV || 'localhost:3002';
 const jwt = require('jsonwebtoken');
-const config = require('dotenv').config().parsed;
+// const config = require('dotenv').config().parsed;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -18,11 +18,11 @@ app.use((req, res, next) => {
    next();
 });
 
-if (!config.CLIENT_SECRET) {
+if (!process.env.CLIENT_SECRET) {
   throw 'Make sure you have a CLIENT_SECRET in your .env file';
 }
 
-app.set('secretKey', config.CLIENT_SECRET);
+app.set('secretKey', process.env.CLIENT_SECRET);
 app.set('port', process.env.PORT || 3002);
 
 app.locals.title = 'faceEmotionAPI';
@@ -56,7 +56,7 @@ const checkAuth = (request, response, next) => {
 app.post('/api/v1/requestAuthentication', (request, response) => {
   const userInfo = request.body;
 
-  if (userInfo.username !== config.USERNAME || userInfo.password !== config.PASSWORD) {
+  if (userInfo.username !== process.env.USERNAME || userInfo.password !== process.env.PASSWORD) {
     response.status(403).send({
       success: false,
       message: 'Your credentials are invalid'
