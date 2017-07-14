@@ -311,7 +311,7 @@ describe('API endpoints tests', () => {
       response.should.have.status(422);
       response.body.should.be.a('object');
       response.body.should.have.property('error');
-      response.body.error.should.equal('Could not update the faces data for face with id of 33');
+      response.body.error.should.equal('Could not update the faces data for face with id of 34');
       done();
     });
   });
@@ -326,15 +326,15 @@ describe('API endpoints tests', () => {
     });
   });
 
-  it('should patch a face, SAD PATH', (done) => {
+  it('should delete a face, SAD PATH', (done) => {
     chai.request(server)
-    .delete('/api/v1/faces/33')
+    .delete('/api/v1/faces/90')
     .set('Authorization', process.env.TOKEN)
     .end((err, response) => {
       response.should.have.status(422);
       response.body.should.be.a('object');
       response.body.should.have.property('error');
-      response.body.error.should.equal('Could not delete face with id of 34 because it did not exist');
+      response.body.error.should.equal('Could not delete face with id of 90 because it did not exist');
       done();
     });
   });
@@ -460,13 +460,13 @@ describe('API endpoints tests', () => {
 
   it('should delete an emotion, SAD PATH', (done) => {
     chai.request(server)
-    .delete('/api/v1/emotions/10')
+    .delete('/api/v1/emotions/90')
     .set('Authorization', process.env.TOKEN)
     .end((err, response) => {
       response.should.have.status(422);
       response.body.should.be.a('object');
       response.body.should.have.property('error');
-      response.body.error.should.equal('Could not delete emotion with id of 10 because it did not exist');
+      response.body.error.should.equal('Could not delete emotion with id of 90 because it did not exist');
       done();
     });
   });
