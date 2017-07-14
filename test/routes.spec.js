@@ -298,7 +298,7 @@ describe('API endpoints tests', () => {
       response.should.have.status(201);
       response.body.should.be.a('object');
       response.body.should.have.property('rowsUpdated');
-      response.body.rowsUpdated.should.equal(1);
+      response.body.rowsUpdated.should.equal(0);
       done();
     });
   });
@@ -307,9 +307,6 @@ describe('API endpoints tests', () => {
     chai.request(server)
     .patch('/api/v1/faces/33')
     .set('Authorization', process.env.TOKEN)
-    .send({
-      'gender_id': 3
-    })
     .end((err, response) => {
       response.should.have.status(422);
       response.body.should.be.a('object');
@@ -453,7 +450,7 @@ describe('API endpoints tests', () => {
 
   it('should delete an emotion, HAPPY PATH', (done) => {
     chai.request(server)
-    .delete('/api/v1/emotions/11')
+    .delete('/api/v1/emotions/10')
     .set('Authorization', process.env.TOKEN)
     .end((err, response) => {
       response.should.have.status(204);
@@ -463,13 +460,13 @@ describe('API endpoints tests', () => {
 
   it('should delete an emotion, SAD PATH', (done) => {
     chai.request(server)
-    .delete('/api/v1/emotions/11')
+    .delete('/api/v1/emotions/10')
     .set('Authorization', process.env.TOKEN)
     .end((err, response) => {
       response.should.have.status(422);
       response.body.should.be.a('object');
       response.body.should.have.property('error');
-      response.body.error.should.equal('Could not delete emotion with id of 11 because it did not exist');
+      response.body.error.should.equal('Could not delete emotion with id of 10 because it did not exist');
       done();
     });
   });
@@ -552,7 +549,7 @@ describe('API endpoints tests', () => {
 
   it('should delete an race, HAPPY PATH', (done) => {
     chai.request(server)
-    .delete('/api/v1/races/11')
+    .delete('/api/v1/races/6')
     .set('Authorization', process.env.TOKEN)
     .end((err, response) => {
       response.should.have.status(204);
