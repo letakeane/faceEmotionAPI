@@ -287,19 +287,9 @@ describe('API endpoints tests', () => {
     });
   });
 
-  it('should delete a face, HAPPY PATH', (done) => {
-    chai.request(server)
-    .delete('/api/v1/faces/34')
-    .set('Authorization', process.env.TOKEN)
-    .end((err, response) => {
-      response.should.have.status(204);
-      done();
-    });
-  });
-
   it('should patch a face, HAPPY PATH', (done) => {
     chai.request(server)
-    .patch('/api/v1/faces/34')
+    .patch('/api/v1/faces/33')
     .set('Authorization', process.env.TOKEN)
     .send({
       'alt_text': 'updated alt text'
@@ -308,14 +298,14 @@ describe('API endpoints tests', () => {
       response.should.have.status(201);
       response.body.should.be.a('object');
       response.body.should.have.property('rowsUpdated');
-      response.body.rowsUpdated.should.equal(0);
+      response.body.rowsUpdated.should.equal(1);
       done();
     });
   });
 
   it('should patch a face, SAD PATH', (done) => {
     chai.request(server)
-    .patch('/api/v1/faces/34')
+    .patch('/api/v1/faces/33')
     .set('Authorization', process.env.TOKEN)
     .send({
       'gender_id': 3
@@ -324,14 +314,24 @@ describe('API endpoints tests', () => {
       response.should.have.status(422);
       response.body.should.be.a('object');
       response.body.should.have.property('error');
-      response.body.error.should.equal('Could not update the faces data for face with id of 34');
+      response.body.error.should.equal('Could not update the faces data for face with id of 33');
       done();
     });
   });
 
-  it('should delete a face, SAD PATH', (done) => {
+  it('should delete a face, HAPPY PATH', (done) => {
     chai.request(server)
-    .delete('/api/v1/faces/34')
+    .delete('/api/v1/faces/33')
+    .set('Authorization', process.env.TOKEN)
+    .end((err, response) => {
+      response.should.have.status(204);
+      done();
+    });
+  });
+
+  it('should patch a face, SAD PATH', (done) => {
+    chai.request(server)
+    .delete('/api/v1/faces/33')
     .set('Authorization', process.env.TOKEN)
     .end((err, response) => {
       response.should.have.status(422);
